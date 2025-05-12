@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from skimage.filters import threshold_otsu
+from scipy.stats import skew
 # functie pentru convertirea imaginii in numpy array
 def preprocess_image_pil(image_path, target_size):
     img = Image.open(image_path)
@@ -23,11 +24,11 @@ def extract_image_features(image_gray):
     features['mean_intensity'] = np.mean(brain_pixels)
     features['std_intensity'] = np.std(brain_pixels)
     features['min_intensity'] = np.min(brain_pixels)
-    features['max_intensity'] = np.max(flat_pixels)
-    features['intensity_range'] = features['max_intensity'] - features['min_intensity']
-    features['median_intensity'] = np.median(flat_pixels)
-    features['q1_intensity'] = np.percentile(flat_pixels, 25)
-    features['q3_intensity'] = np.percentile(flat_pixels, 75)
+    features['max_intensity'] = np.max(brain_pixels)
+    features['skewness'] = skew(brain_pixels)
+    features['median_intensity'] = np.median(brain_pixels)
+    features['q1_intensity'] = np.percentile(brain_pixels, 25)
+    features['iqr_intensity'] = np.percentile(brain_pixels, 75) - features['q1_intensity']
     return features
 
 directory = 'All_Tumor_Labeled'
