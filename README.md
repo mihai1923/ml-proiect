@@ -26,33 +26,32 @@ Pentru a pregati datele pentru antrenarea unui model de machine learning, am efe
 
 1.  **Iterarea prin directoare**: Scriptul parcurge fiecare subdirector (clasa de tumora) din `All_Tumor_Labeled`.
 2.  **Citirea imaginilor**: Fiecare imagine este citita folosind biblioteca Pillow (PIL).
-3.  **Conversia in tonuri de gri**: Imaginile sunt convertite in tonuri de gri si sunt redimensionate la o dimensiune standard de 128x128 pixeli. Acest lucru asigura datelor de intrare.
+3.  **Conversia in tonuri de gri**: Imaginile sunt convertite in tonuri de gri si sunt redimensionate la o dimensiune standard de 256x256 pixeli.
 5.  **Conversia in array numpy**: Imaginea preprocesata este convertita intr-un array numpy pentru a face usoare calculele.
 
-### 1.2. Extragerea Caracteristicilor (Features)
+### 1.2. Ce Informatii Am Extras din Imagini?
 
-Pentru fiecare imagine preprocesata, s-au extras urmatoarele caracteristici. Acestea, impreuna cu eticheta clasei (`tumor_type`), alcatuiesc coloanele setului de date final:
+Dupa ce am separat creierul de fundalul negru (cu o metoda numita Otsu), am calculat pentru fiecare imagine urmatoarele caracteristici statistice din pixelii regiunii creierului:
 
-1.  **`mean_intensity`**: Media valorilor pixelilor. Indica luminozitatea generala a imaginii. (Tip: Numar real)
-2.  **`std_intensity`**: Deviatia standard a valorilor pixelilor. Masoara contrastul general al imaginii; o valoare mai mare indica un contrast mai ridicat. (Tip: Numar real)
-3.  **`min_intensity`**: Valoarea minima a intensitatii unui pixel din imagine (cel mai intunecat pixel). (Tip: Numar intreg)
-4.  **`max_intensity`**: Valoarea maxima a intensitatii unui pixel din imagine (cel mai luminos pixel). (Tip: Numar intreg)
-5.  **`intensity_range`**: Diferenta dintre `max_intensity` si `min_intensity`. Ofera o alta masura a contrastului imaginii. (Tip: Numar intreg)
-6.  **`median_intensity`**: Valoarea mediana a intensitatii pixelilor. Spre deosebire de medie, mediana este mai putin sensibila la outlieri din imagine. (Tip: Numar real)
-7.  **`q1_intensity`**: 25% dintre pixeli au o valoare a intensitatii mai mica sau egala cu aceasta. (Tip: Numar real)
-8.  **`q3_intensity`**: 75% dintre pixeli au o valoare a intensitatii mai mica sau egala cu aceasta. (Tip: Numar real)
-9.  **`tumor_type`**: Eticheta categoriei de tumora (de ex., 'glioma', 'meningioma', 'notumor', 'pituitary'). (Tip: Sir de caractere)
+1.  **`mean_intensity`**: Media intensitatii pixelilor (luminozitate generala).
+2.  **`std_intensity`**: Deviatia standard a intensitatii (contrast).
+3.  **`min_intensity`**: Intensitatea minima (cel mai intunecat pixel).
+4.  **`max_intensity`**: Intensitatea maxima (cel mai luminos pixel).
+5.  **`skewness`**: Asimetria distributiei intensitatilor.
+6.  **`median_intensity`**: Mediana intensitatii.
+7.  **`q1_intensity`**: Valoarea sub care se situeaza 25% din intensitati.
+8.  **`iqr_intensity`**: Intervalul interquartilic (diferenta dintre al treilea si primul quartil al intensitatii), masoara robustetea variatiei.
+9.  **`tumor_type`**: Eticheta categoriei (ex: 'glioma', 'notumor').
 
-### 1.3. De ce aceste caracteristici?
+### 1.3. De Ce Aceste Informatii?
 
-Am ales aceste date simple despre pixeli deoarece:
+Am ales aceste caracteristici statistice simple deoarece:
 
-*   **Descriu imaginea:** Indica luminozitatea generala, intunecimea si variatiile de intensitate. O tumora poate modifica aceste aspecte.
-*   **Arata contrastul:** Masoara diferentele dintre zonele luminoase si cele intunecate. Tumorile pot avea un contrast distinct.
-*   **Sunt robuste:** Anumite valori (mediana, percentile) ignora mai bine pixelii izolati, eronati.
-*   **Sunt practice:** Usor de calculat si interpretat, ideale pentru modelul nostru.
+*   **Descriu imaginea:** Ofera informatii despre luminozitatea generala, contrastul si distributia intensitatilor pixelilor din regiunea de interes a creierului. O tumora poate modifica aceste aspecte.
+*   **Sunt relativ robuste:** Mediana si IQR sunt mai putin sensibile la valori extreme izolate.
+*   **Sunt practice:** Usor de calculat si interpretat, oferind o baza pentru modelele de clasificare.
 
-### 1.4. Crearea Setului de Date Tabelar
+### 1.4. Cum Am Salvat Informatiile?
 
 Caracteristicile extrase pentru fiecare imagine, impreuna cu label-ul tumorei (`tumor_type`) sunt stocate intr-un dataframe din pandas. Acest dataframe este apoi salvat intr-un fisier CSV (`brain_tumor_features.csv`), care va constitui setul de date tabelar utilizat pentru etapele urmatoare ale proiectului.
 
