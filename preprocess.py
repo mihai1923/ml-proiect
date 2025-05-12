@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from PIL import Image
-
+from skimage.filters import threshold_otsu
 # functie pentru convertirea imaginii in numpy array
 def preprocess_image_pil(image_path, target_size):
     img = Image.open(image_path)
@@ -14,15 +14,15 @@ def preprocess_image_pil(image_path, target_size):
 # functie pentru extragerea caracteristicilor
 def extract_image_features(image_gray):
     features = {}
-    flat_pixels = image_gray.flatten() # transformam intr-un vector pentru usurinta
-    features['mean_intensity'] = np.mean(flat_pixels)
-    features['std_intensity'] = np.std(flat_pixels)
-    # deoareece background-ul ct scan-urilor este negru (pixelul minim este 0 mereu)
-    # vrem sa luam cea mai mica valoare a unui pixel ce face parte din creier
-    # asa ca ne uitam la pixelii > 15
-    non_zero_pixels = flat_pixels[flat_pixels > 15]
-    if len(non_zero_pixels) > 0:
-        features['min_intensity'] = np.min(non_zero_pixels)
+    flat_pixels = image_gray.flatten()
+    # incercam cat pe mult sa ignoram background-ul negru
+    # care strica valorile caracteristicilor folosind threshold_otsu
+    uniq_vals = np.unique(image_gray)
+    thresh = threshold_otsu(image_gray)
+    brain_pixels = flat_pixels[flat_pixels > thresh]
+    features['mean_intensity'] = np.mean(brain_pixels)
+    features['std_intensity'] = np.std(brain_pixels)
+    features['min_intensity'] = np.min(brain_pixels)
     features['max_intensity'] = np.max(flat_pixels)
     features['intensity_range'] = features['max_intensity'] - features['min_intensity']
     features['median_intensity'] = np.median(flat_pixels)
@@ -32,7 +32,7 @@ def extract_image_features(image_gray):
 
 directory = 'All_Tumor_Labeled'
 categories = ['glioma', 'meningioma', 'notumor', 'pituitary']
-img_size = (128, 128)
+img_size = (256, 256)
 output_csv = 'brain_tumor_features.csv'
 all_features_list = []
 print(f"Inceput extragere caracteristici...")
@@ -53,7 +53,7 @@ for category_idx, category in enumerate(categories):
         img_features['tumor_type'] = category
         # punem toate caracteristicile in lista
         all_features_list.append(img_features)
-        # afisam la fiecare 200 de iteratii sa putem vedea procesul
+        # afisam la fiecare 200 de iteratii sa putem vedea progresul
         if (i + 1) % 200 == 0:
             print(f"  Procesat {i + 1}/{len(image_files)} imagini in {category}...")
     print(f"Finalizat procesarea a {len(image_files)} imagini pentru categoria: {category}.")

@@ -55,3 +55,9 @@ Am ales aceste date simple despre pixeli deoarece:
 ### 1.4. Crearea Setului de Date Tabelar
 
 Caracteristicile extrase pentru fiecare imagine, impreuna cu label-ul tumorei (`tumor_type`) sunt stocate intr-un dataframe din pandas. Acest dataframe este apoi salvat intr-un fisier CSV (`brain_tumor_features.csv`), care va constitui setul de date tabelar utilizat pentru etapele urmatoare ale proiectului.
+
+### 1.5. Observatii si Procesari Suplimentare
+
+Initial, caracteristicile (precum media, mediana, minimul intensitatii etc.) au fost calculate direct pe baza tuturor pixelilor din imaginile redimensionate. Cu toate acestea, am observat ca fundalul predominant negru al imaginilor RMN afecta in mod semnificativ aceste caracteristici. De exemplu, `min_intensity` era intotdeauna 0, iar media si mediana intensitatilor erau foarte mult trase in jos de numarul mare de pixeli negri, astfel informatia relevanta despre tumora devenind eronata.
+
+Pentru a adresa aceasta problema si a obtine corect valorile caracteristicilor, s-a implementat o metoda de calcul al threshold-ului pixelilor **Otsu** (din biblioteca `scikit-image`). Pentru fiecare imagine, algoritmul Otsu determina un prag optim pentru a separa pixelii din prim-plan de cei din fundal. Ulterior, toate caracteristicile mentionate anterior au fost recalculate luand in considerare doar pixelii identificati ca apartinand prim-planului. Aceasta implementare nu este cea mai optima, dar este rapida, necesita doar o apelare de functie, `threshold_otsu` si ne ajuta sa avem totusi un set de date mai relevant.
