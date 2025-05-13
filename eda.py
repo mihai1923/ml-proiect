@@ -16,7 +16,7 @@ if not os.path.exists("eda_plots"):
 train_df = pd.read_csv("train.csv")
 test_df = pd.read_csv("test.csv")
 
-features = ['mean_intensity', 'std_intensity', 'min_intensity', 'max_intensity', 'median_intensity', 'q1_intensity', 'skewness', 'iqr_intensity']
+features = ['mean_intensity', 'std_intensity', 'skewness', 'max_intensity', 'contrast', 'energy', 'homogeneity', 'dissimilarity', 'correlation', 'entropy']
 target_column = 'tumor_type'
 plots_dir = "eda_plots"
 
@@ -33,7 +33,7 @@ print(f"Statistici descriptive pentru target '{target_column}' (Date de Test):")
 print(test_df[target_column].describe())
 
 # histograme pentru caracteristici
-fig_train, axes_train = plt.subplots(2, 4, figsize=(20, 10)) # grid 2x4 pentru 8 caracteristici
+fig_train, axes_train = plt.subplots(2, 5, figsize=(25, 10)) 
 fig_train.suptitle('Distributia Caracteristicilor (Date de Antrenament)', fontsize=16)
 axes_train = axes_train.flatten()
 for i, feature in enumerate(features):
@@ -43,7 +43,7 @@ for i, feature in enumerate(features):
     axes_train[i].set_ylabel('Frecventa', fontsize=10)
 save_plot(fig_train, plots_dir, 'histograms_combined_train.png')
 
-fig_test, axes_test = plt.subplots(2, 4, figsize=(20, 10))
+fig_test, axes_test = plt.subplots(2, 5, figsize=(25, 10))
 fig_test.suptitle('Distributia Caracteristicilor (Date de Test)', fontsize=16)
 axes_test = axes_test.flatten()
 for i, feature in enumerate(features):
@@ -68,7 +68,7 @@ ax_countplot_test.set_xlabel(target_column, fontsize=12)
 ax_countplot_test.set_ylabel('Numar', fontsize=12)
 save_plot(fig_countplot_test, plots_dir, f'countplot_{target_column}_test.png')
 
-fig_boxplot_train, axes_boxplot_train = plt.subplots(2, 4, figsize=(20, 10))
+fig_boxplot_train, axes_boxplot_train = plt.subplots(2, 5, figsize=(25, 10))
 fig_boxplot_train.suptitle('Boxplot-uri Caracteristici (Date de Antrenament)', fontsize=16)
 axes_boxplot_train = axes_boxplot_train.flatten()
 pastel_colors = sns.color_palette("pastel")
@@ -79,12 +79,12 @@ for i, feature in enumerate(features):
 save_plot(fig_boxplot_train, plots_dir, 'boxplots_combined_train.png')
 
 correlation_matrix_train = train_df[features].corr()
-fig, ax = plt.subplots(figsize=(12, 10))
+fig, ax = plt.subplots(figsize=(14, 12))
 sns.heatmap(correlation_matrix_train, annot=True, cmap='coolwarm', fmt=".2f", linewidths=.5, ax=ax)
 ax.set_title('Matrice de Corelatie a Caracteristicilor (Antrenament)', fontsize=15)
 save_plot(fig, plots_dir, 'correlation_heatmap_train.png')
 
-fig_violin_train, axes_violin_train = plt.subplots(2, 4, figsize=(20, 10))
+fig_violin_train, axes_violin_train = plt.subplots(2, 5, figsize=(25, 10))
 fig_violin_train.suptitle(f'Caracteristici vs. {target_column} (Date de Antrenament)', fontsize=16)
 axes_violin_train = axes_violin_train.flatten()
 for i, feature in enumerate(features):

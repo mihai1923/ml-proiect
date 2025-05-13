@@ -4,6 +4,9 @@ import pandas as pd
 from PIL import Image
 from skimage.filters import threshold_otsu
 from scipy.stats import skew
+from skimage.feature import graycomatrix, graycoprops
+from skimage.filters import sobel
+
 # functie pentru convertirea imaginii in numpy array
 def preprocess_image_pil(image_path, target_size):
     img = Image.open(image_path)
@@ -21,14 +24,21 @@ def extract_image_features(image_gray):
     uniq_vals = np.unique(image_gray)
     thresh = threshold_otsu(image_gray)
     brain_pixels = flat_pixels[flat_pixels > thresh]
-    features['mean_intensity'] = np.mean(brain_pixels)
-    features['std_intensity'] = np.std(brain_pixels)
-    features['min_intensity'] = np.min(brain_pixels)
-    features['max_intensity'] = np.max(brain_pixels)
-    features['skewness'] = skew(brain_pixels)
-    features['median_intensity'] = np.median(brain_pixels)
-    features['q1_intensity'] = np.percentile(brain_pixels, 25)
-    features['iqr_intensity'] = np.percentile(brain_pixels, 75) - features['q1_intensity']
+    brain_pixels_normalized = brain_pixels / 255.0 # normalizam valorile pixelilor
+    features['mean_intensity'] = np.mean(brain_pixels_normalized)
+    features['std_intensity'] = np.std(brain_pixels_normalized)
+    features['skewness'] = skew(brain_pixels_normalized)
+    features['max_intensity'] = np.max(brain_pixels_normalized)
+    # gray level co-occurance matrix - ne ajuta sa calculam caracteristici mai avansate
+    # despre pixelii pe care ii avem in poza
+    glcm = graycomatrix(image_gray, distances=[1], angles=[0], levels=256, symmetric=True, normed=True)
+    features['contrast'] = graycoprops(glcm, 'contrast')[0, 0]
+    features['energy'] = graycoprops(glcm, 'energy')[0, 0]
+    features['homogeneity'] = graycoprops(glcm, 'homogeneity')[0, 0]
+    features['dissimilarity'] = graycoprops(glcm, 'dissimilarity')[0, 0]
+    features['correlation'] = graycoprops(glcm, 'correlation')[0, 0]
+    glcm = glcm[glcm > 0] # avem grija sa nu calculam log(0)
+    features['entropy'] = -np.sum(glcm * np.log2(glcm))
     return features
 
 directory = 'All_Tumor_Labeled'

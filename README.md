@@ -33,23 +33,19 @@ Pentru a pregati datele pentru antrenarea unui model de machine learning, am efe
 
 Dupa ce am separat creierul de fundalul negru (cu o metoda numita Otsu), am calculat pentru fiecare imagine urmatoarele caracteristici statistice din pixelii regiunii creierului:
 
-1.  **`mean_intensity`**: Media intensitatii pixelilor (luminozitate generala).
+1.  **`mean_intensity`**: Media intensitatii pixelilor normalizati (0-1).
 2.  **`std_intensity`**: Deviatia standard a intensitatii (contrast).
-3.  **`min_intensity`**: Intensitatea minima (cel mai intunecat pixel).
+3.  **`skewness`**: Asimetria distributiei intensitatilor.
 4.  **`max_intensity`**: Intensitatea maxima (cel mai luminos pixel).
-5.  **`skewness`**: Asimetria distributiei intensitatilor.
-6.  **`median_intensity`**: Mediana intensitatii.
-7.  **`q1_intensity`**: Valoarea sub care se situeaza 25% din intensitati.
-8.  **`iqr_intensity`**: Intervalul interquartilic (diferenta dintre al treilea si primul quartil al intensitatii), masoara robustetea variatiei.
-9.  **`tumor_type`**: Eticheta categoriei (ex: 'glioma', 'notumor').
+5.  **`contrast`**: Contrastul local din imagine, calculat din GLCM (Gray Level Co-occurrence Matrix) pe imaginea redimensionata in tonuri de gri (0-255). Masoara variatia locala a intensitatilor.
+6.  **`energy`**: O masura a uniformitatii texturii, calculata din GLCM. Valori mari indica o textura mai omogena.
+7.  **`homogeneity`**: Omogenitatea locala a imaginii, calculata din GLCM. Masoara cat de similari sunt pixelii vecini.
+8.  **`dissimilarity`**: Disimilaritatea locala, calculata din GLCM.
+9.  **`correlation`**: Corelatia dintre intensitatile pixelilor vecini, calculata din GLCM. Indica linearitatea structurilor din imagine.
+10. **`entropy`**: Entropia imaginii, calculata din GLCM. Masoara randomness sau complexitatea texturii.
+11. **`tumor_type`**: Eticheta categoriei (ex: 'glioma', 'meningioma', 'notumor', 'pituitary').
 
-### 1.3. De Ce Aceste Informatii?
-
-Am ales aceste caracteristici statistice simple deoarece:
-
-*   **Descriu imaginea:** Ofera informatii despre luminozitatea generala, contrastul si distributia intensitatilor pixelilor din regiunea de interes a creierului. O tumora poate modifica aceste aspecte.
-*   **Sunt relativ robuste:** Mediana si IQR sunt mai putin sensibile la valori extreme izolate.
-*   **Sunt practice:** Usor de calculat si interpretat, oferind o baza pentru modelele de clasificare.
+**Observatii**: Initial, am folosit niste caracteristici foarte simple (precum `min_intensity`, `median_intensity`, `median_intensity`, `max_intensity`). Dupa ce am ajuns la EDA si am vazut relatiile foarte mari intre caracteristici (>0.9 sau unele chiar 0.98 - 0.99), am ales sa caut seturi de date asemanatoare si sa ma inspir cu privinta la caracteristicile pe care le-as putea folosi (am decis sa iau caracteristici asemanatoare cu acest dataset https://www.kaggle.com/datasets/jakeshbohaju/brain-tumor). De asemenea am adaugat normalizarea pixelilor (impartirea cu 255) care nu se facea inainte.
 
 ### 1.4. Cum Am Salvat Informatiile?
 
@@ -57,9 +53,9 @@ Caracteristicile extrase pentru fiecare imagine, impreuna cu label-ul tumorei (`
 
 ### 1.5. Observatii si Procesari Suplimentare
 
-Initial, caracteristicile (precum media, mediana, minimul intensitatii etc.) au fost calculate direct pe baza tuturor pixelilor din imaginile redimensionate. Cu toate acestea, am observat ca fundalul predominant negru al imaginilor RMN afecta in mod semnificativ aceste caracteristici. De exemplu, `min_intensity` era intotdeauna 0, iar media si mediana intensitatilor erau foarte mult trase in jos de numarul mare de pixeli negri, astfel informatia relevanta despre tumora devenind eronata.
+Initial, caracteristicile au fost calculate direct pe baza tuturor pixelilor din imaginile redimensionate. Cu toate acestea, am observat ca fundalul predominant negru al imaginilor RMN afecta in mod semnificativ aceste caracteristici. 
 
-Pentru a adresa aceasta problema si a obtine corect valorile caracteristicilor, s-a implementat o metoda de calcul al threshold-ului pixelilor **Otsu** (din biblioteca `scikit-image`). Pentru fiecare imagine, algoritmul Otsu determina un prag optim pentru a separa pixelii din prim-plan de cei din fundal. Ulterior, toate caracteristicile mentionate anterior au fost recalculate luand in considerare doar pixelii identificati ca apartinand prim-planului. Aceasta implementare nu este cea mai optima, dar este rapida, necesita doar o apelare de functie, `threshold_otsu` si ne ajuta sa avem totusi un set de date mai relevant.
+Pentru a adresa aceasta problema si a obtine corect valorile caracteristicilor, s-a implementat o metoda de calcul al threshold-ului pixelilor **Otsu** (din biblioteca `scikit-image`). Pentru fiecare imagine, algoritmul Otsu determina un prag optim pentru a separa pixelii din prim-plan de cei din fundal. Ulterior, toate caracteristicile au fost recalculate luand in considerare doar pixelii identificati ca apartinand prim-planului. Aceasta implementare nu este cea mai optima, dar este rapida, necesita doar o apelare de functie, `threshold_otsu` si ne ajuta sa avem totusi un set de date mai relevant.
 
 ## 2. Pregatirea Datelor pentru Antrenament
 
