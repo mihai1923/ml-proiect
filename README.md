@@ -20,7 +20,7 @@ Setul de date este structurat in subdirectoare, fiecare corespunzand uneia dintr
 
 Tipul problemei abordate este **clasificare multi-clasa**, unde scopul este de a antrena un model capabil sa prezica tipul de tumora (sau absenta unei tumori) pe baza caracteristicilor extrase din imagini.
 
-Pentru a pregati datele pentru antrenarea unui model de machine learning, am efectuat urmatorii pasi de preprocesare si extragere de caracteristici, implementati in scriptul `preprocess.py`:
+Pentru a pregati datele pentru antrenarea unui model de machine learning, am efectuat urmatorii pasi de preprocesare si extragere de caracteristici.
 
 ### 1.1. Incarcarea si Preprocesarea Imaginilor
 
@@ -59,7 +59,7 @@ Pentru a adresa aceasta problema si a obtine corect valorile caracteristicilor, 
 
 ## 2. Pregatirea Datelor pentru Antrenament
 
-Dupa extragerea caracteristicilor in `brain_tumor_features.csv`, scriptul `split_data.py` imparte datele in training si test
+Dupa extragerea caracteristicilor in `brain_tumor_features.csv`, impartim datele in training si test
 
 1.  **Impartire Train/Test**: Setul de date este impartit:
     *   80% pentru antrenarea modelului (`train.csv`).
@@ -69,3 +69,33 @@ Dupa extragerea caracteristicilor in `brain_tumor_features.csv`, scriptul `split
 4.  **Reproductibilitate**: Se foloseste o valoare fixa pentru `random_state` pentru ca impartirea sa fie identica la fiecare rulare a scriptului.
 
 Fisierele rezultate, `train.csv` si `test.csv`, contin datele gata pentru a fi folosite la antrenarea si evaluarea modelului.
+
+## 3. Analiza Exploratorie a Datelor (EDA)
+
+Am facut o Analiza Exploratorie a Datelor (EDA) pe seturile de antrenament si test pentru a intelege mai bine datele.
+
+### 3.1. Verificarea Valorilor Lipsa
+
+Setul de date este complet si nu are valori lipsa (NaN), asa cum ne asteptam. Nu a trebuit sa completam nimic.
+
+### 3.2. Consistenta Statisticilor Descriptive
+
+Statisticile de baza (medie, deviatie standard) ale caracteristicilor sunt foarte asemanatoare intre seturile de antrenament si test (de ex., `mean_intensity` e ~0.379 in train si ~0.377 in test). Asta, plus faptul ca `tumor_type` e impartit la fel in ambele seturi, arata ca datele sunt bine impartite.
+
+### 3.3. Similaritatea Distributiilor Caracteristicilor
+
+Histogramele arata ca valorile fiecarei caracteristici se distribuie cam la fel in setul de antrenament si cel de test. Asta inseamna ca ambele seturi sunt la fel si pot fi folosite pentru model.
+
+### 3.4. Corelatia Intre Caracteristici (Heatmap)
+
+Matricea de corelatie a aratat ca unele caracteristici sunt legate puternic intre ele (ex: `energy` si `homogeneity` pozitiv), altele invers (ex: `dissimilarity` si `correlation` negativ). Caracteristici ca `skewness` si `contrast` par mai independente. Corelatiile mari inseamna ca avem informatie redundanta, deci poate ar fi util sa combinam unele din aceste caracteristici sau sa folosim tehnici de reducere a dimensionalitatii sau de selectie a caracteristicilor pentru a gestiona aceasta redundanta.
+
+### 3.5. Relatia dintre Caracteristici si Clasa Tinta (Violin Plots)
+
+Graficele violin arata cum se distribuie fiecare caracteristica pentru fiecare `tumor_type`. Pentru `notumor`, unele caracteristici (`mean_intensity`, `std_intensity`, `contrast`, `energy`, `dissimilarity`) au de obicei valori mai mari. `skewness` si `entropy` arata diferit pentru fiecare clasa. Majoritatea caracteristicilor par utile pentru a deosebi tumorile.
+
+### 3.6. Valori Extreme si Distributia Datelor (Boxplots)
+
+Boxplot-urile arata ca avem valori extreme (outlieri) la majoritatea caracteristicilor, mai ales la `contrast` si `dissimilarity`. Imprastierea valorilor e diferita de la o caracteristica la alta.
+
+In concluzie, EDA a aratat ca datele sunt de calitate. Caracteristicile alese par bune pentru a deosebi tipurile de tumori. Ce am vazut despre corelatii si outlieri ne va ajuta sa imbunatatim modelul.
