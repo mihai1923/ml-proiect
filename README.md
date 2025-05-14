@@ -57,6 +57,16 @@ Initial, caracteristicile au fost calculate direct pe baza tuturor pixelilor din
 
 Pentru a adresa aceasta problema si a obtine corect valorile caracteristicilor, s-a implementat o metoda de calcul al threshold-ului pixelilor **Otsu** (din biblioteca `scikit-image`). Pentru fiecare imagine, algoritmul Otsu determina un prag optim pentru a separa pixelii din prim-plan de cei din fundal. Ulterior, toate caracteristicile au fost recalculate luand in considerare doar pixelii identificati ca apartinand prim-planului. Aceasta implementare nu este cea mai optima, dar este rapida, necesita doar o apelare de functie, `threshold_otsu` si ne ajuta sa avem totusi un set de date mai relevant.
 
+Desi datele de pe Kaggle veneau deja impartite in train si test, am ales sa punem toate imaginile in folderele lor, pe baza etichetei. Am facut acest lucru ca sa putem aplica procesul de augmentare pe toate datele de la inceput, inainte sa le impartim din nou in train si test dupa preprocesare si augmentare.
+
+### 1.6. Tehnici de augmentare
+
+Initial, setul nostru de date era alcatuit doar din cele 7023 de imagini cu creierul uman cu caracteristicile specificate anterior. La antrenarea unui model cu ajutorul Random Forest Classifier pe acest set de date am avut o acuratete de ~90%. Pentru a genera sample-uri noi, am aplicat asupra imaginilor originale 3 modificari,
+    1) Oglindirea imaginii originale
+    2) Aplicarea unui unghi de rotatie (aflat in [-20, 20]) imaginii
+    3) Aplicarea atat rotatiei cat si oglindirea imaginii
+Aceste trei modificari au construit la randul lor inca 7023 de imagini fiecare si au fost calculate aceleasi caracteristici ca imaginilor originale, apoi au fost adaugate setului de date original, in final ajungand la 28092 de imagini pe care le vom folosi mai incolo, de 4 ori mai multe date decat initial. Cu ajutorul acestor augmentari asupra imaginilor originale, acelasi model Random Forest Classifier a ajuns sa aiba o acuratete de ~98%, mult mai buna decat initialul rezultat. Dezavantajul acestei metode este memoria in plus pe care trebuie sa o avem pentru salvarea csv-ului final (600kb -> 2.6Mb, nesemnificativ datorita putinelor poze, dar pentru un set de milioane sau chiar zeci de milioane de date, aceasta crestere proportionala la numarul original de date aduce o nevoie de foarte multa memorie), dar si timpul necesar preprocesarii acestor date este notabil mai mare. Nefiind restransi de timp sau memorie consider ca aceste transformari sunt perfecte modelului nostru.
+
 ## 2. Pregatirea Datelor pentru Antrenament
 
 Dupa extragerea caracteristicilor in `brain_tumor_features.csv`, impartim datele in training si test
