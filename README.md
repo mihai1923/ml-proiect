@@ -1,6 +1,6 @@
 # Proiect PCLP3 - Partea I: Clasificarea Tumorilor Cerebrale
 
-Nume: Tuca Mihai-Laurentiu
+Nume: Țucă Mihai-Laurențiu
 Grupa: 314CA
 
 ## 1. Descrierea Setului de Date
@@ -61,10 +61,11 @@ Desi datele de pe Kaggle veneau deja impartite in train si test, am ales sa pune
 
 ### 1.5. Tehnici de augmentare
 
-Initial, setul nostru de date era alcatuit doar din cele 7023 de imagini cu creierul uman cu caracteristicile specificate anterior. La antrenarea unui model cu ajutorul Random Forest Classifier pe acest set de date am avut o acuratete de ~90%. Pentru a genera sample-uri noi, am aplicat asupra imaginilor originale 3 modificari,
-    * Oglindirea imaginii originale
-    * Aplicarea unui unghi de rotatie (aflat in [-20, 20]) imaginii
-    * Aplicarea atat rotatiei cat si oglindirea imaginii
+Initial, setul nostru de date era alcatuit doar din cele 7023 de imagini cu creierul uman cu caracteristicile specificate anterior. La antrenarea unui model cu ajutorul Random Forest Classifier pe acest set de date am avut o acuratete de ~90%. Pentru a genera sample-uri noi, am aplicat asupra imaginilor originale 3 modificari:
+*   Oglindirea imaginii originale
+*   Aplicarea unui unghi de rotatie (aflat in [-20, 20]) imaginii
+*   Aplicarea atat rotatiei cat si oglindirea imaginii
+
 Aceste trei modificari au construit la randul lor inca 7023 de imagini fiecare si au fost calculate aceleasi caracteristici ca imaginilor originale, apoi au fost adaugate setului de date original, in final ajungand la 28092 de imagini pe care le vom folosi mai incolo, de 4 ori mai multe date decat initial. Cu ajutorul acestor augmentari asupra imaginilor originale, acelasi model Random Forest Classifier a ajuns sa aiba o acuratete de ~98%, mult mai buna decat initialul rezultat. Dezavantajul acestei metode este memoria in plus pe care trebuie sa o avem pentru salvarea csv-ului final (600kb -> 2.6Mb, nesemnificativ datorita putinelor poze, dar pentru un set de milioane sau chiar zeci de milioane de date, aceasta crestere proportionala la numarul original de date aduce o nevoie de foarte multa memorie), dar si timpul necesar preprocesarii acestor date este notabil mai mare. Nefiind restransi de timp sau memorie consider ca aceste transformari sunt perfecte modelului nostru.
 
 ## 2. Pregatirea Datelor pentru Antrenament
@@ -76,8 +77,11 @@ Dupa extragerea caracteristicilor in `brain_tumor_features.csv`, impartim datele
     *   20% pentru testarea modelului (`test.csv`).
 2.  **Amestecare (Shuffle)**: Datele sunt amestecate aleatoriu inainte de impartire pentru a asigura ca seturile de antrenament si test sunt reprezentative.
 3.  **Stratificare**: Impartirea se face stratificat pe baza coloanei `tumor_type`. Acest lucru asigura ca fiecare tip de tumora este prezent in proportii similare atat in setul de antrenament, cat si in cel de test, pentru a nu favoriza o anumita tumora.
+
 ![](./plots/countplot_test.png)
+
 ![](./plots/countplot_train.png)
+
 4.  **Reproductibilitate**: Se foloseste o valoare fixa pentru `random_state` pentru ca impartirea sa fie identica la fiecare rulare a scriptului.
 
 Fisierele rezultate, `train.csv` si `test.csv`, contin datele gata pentru a fi folosite la antrenarea si evaluarea modelului.
@@ -95,20 +99,29 @@ Setul de date este complet si nu are valori lipsa (NaN), asa cum ne asteptam. Nu
 Statisticile de baza (medie, deviatie standard) ale caracteristicilor sunt foarte asemanatoare intre seturile de antrenament si test (de ex., `mean_intensity` e ~0.379 in train si ~0.377 in test). Asta, plus faptul ca `tumor_type` e impartit la fel in ambele seturi, arata ca datele sunt bine impartite.
 
 ### 3.3. Similaritatea Distributiilor Caracteristicilor
+
 ![](./plots/hist_feature_train.png)
+
 ![](./plots/hist_feature_test.png)
+
 Histogramele arata ca valorile fiecarei caracteristici se distribuie cam la fel in setul de antrenament si cel de test. Asta inseamna ca ambele seturi sunt la fel si pot fi folosite pentru model.
 
 ### 3.4. Corelatia Intre Caracteristici (Heatmap)
+
 ![](./plots/correlation_matrix.png)
+
 Matricea de corelatie a aratat ca unele caracteristici sunt legate puternic intre ele (ex: `energy` si `homogeneity` pozitiv), altele invers (ex: `dissimilarity` si `correlation` negativ). Caracteristici ca `skewness` si `contrast` par mai independente. Corelatiile mari inseamna ca avem informatie redundanta, deci poate ar fi util sa combinam unele din aceste caracteristici sau sa folosim tehnici de reducere a dimensionalitatii sau de selectie a caracteristicilor pentru a gestiona aceasta redundanta.
 
 ### 3.5. Relatia dintre Caracteristici si Clasa Tinta (Violin Plots)
+
 ![](./plots/violinplots_feature_vs_label.png)
+
 Graficele violin arata cum se distribuie fiecare caracteristica pentru fiecare `tumor_type`. Pentru `notumor`, unele caracteristici (`mean_intensity`, `std_intensity`, `contrast`, `energy`, `dissimilarity`) au de obicei valori mai mari. `skewness` si `entropy` arata diferit pentru fiecare clasa. Majoritatea caracteristicilor par utile pentru a deosebi tumorile.
 
 ### 3.6. Valori Extreme si Distributia Datelor (Boxplots)
+
 ![](./plots/boxplot_train.png)
+
 Boxplot-urile arata ca avem valori extreme (outlieri) la majoritatea caracteristicilor, mai ales la `contrast` si `dissimilarity`. Imprastierea valorilor e diferita de la o caracteristica la alta.
 
 In concluzie, EDA a aratat ca datele sunt de calitate. Caracteristicile alese par bune pentru a deosebi tipurile de tumori. Ce am vazut despre corelatii si outlieri ne va ajuta sa imbunatatim modelul.
@@ -135,7 +148,9 @@ Performanta modelului antrenat a fost evaluata pe setul de test (`test.csv`). Es
 Valorile sunt foarte bune pentru toate clasele, cu o distinctie aproape perfecta pentru clasa `notumor`. (1598/1600) Cel mai mic recall (0.97) este pentru `glioma`, indicand ca o mica parte (3%) din aceste tumori sunt inca gresit clasificate.
 
 *   **Matricea de Confuzie:** Arata unde face modelul erori.
+
 ![](./plots/confusion_matrix.png)
+
 Matricea confirma performanta generala excelenta. Un aspect deosebit de important, vizibil si aici, este numarul foarte mic de cazuri reale de tumori (`glioma`, `meningioma`, `pituitary`) care sunt clasificate gresit ca `notumor`. Aceasta este o caracteristica pozitiva majora, deoarece, din punct de vedere medical, a rata o tumora existenta (un fals negativ pentru clasele de tumori) ar avea consecinte mult mai grave decat a clasifica gresit un tip de tumora cu un altul sau a clasifica un caz sanatos ca avand o tumora (un fals pozitiv). Matricea arata, de asemenea, putinele confuzii intre diferitele tipuri de tumori (ex: `glioma` confundat uneori cu `meningioma` sau `pituitary`).
 
 ### 4.3. Interpretarea Rezultatelor
