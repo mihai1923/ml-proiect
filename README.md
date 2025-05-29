@@ -1,11 +1,8 @@
-# Proiect PCLP3 - Partea I: Clasificarea Tumorilor Cerebrale
-
-Nume: Țucă Mihai-Laurențiu
-Grupa: 314CA
+# Clasificarea Tumorilor Cerebrale
 
 ## 1. Descrierea Setului de Date
 
-Pentru acest proiect, am utilizat datele aflate in directorul **All_Tumor_Labeled** (https://www.kaggle.com/datasets/orvile/brain-tumor-dataset am pus training + test intr-un singur director urmand sa fie separate ulterior). Acesta contine imagini ale creierului uman, clasificate in patru categorii distincte:
+Am utilizat datele aflate in directorul **All_Tumor_Labeled** (https://www.kaggle.com/datasets/orvile/brain-tumor-dataset). Acesta contine imagini ale creierului uman, clasificate in patru categorii distincte:
 
 *   **Glioma**: Imagini reprezentand tumori de tip gliom.
 *   **Meningioma**: Imagini reprezentand tumori de tip meningiom.
